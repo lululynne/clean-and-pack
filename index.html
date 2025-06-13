@@ -1,32 +1,20 @@
 <!DOCTYPE html>
-<html lang="zh-CN">
+<html lang="zh">
 <head>
-  <meta charset="UTF-8" />
-  <title>梅宝 × 阿景 的记忆打包机</title>
-  <link href="https://fonts.googleapis.com/css2?family=LXGW+WenKai&display=swap" rel="stylesheet"> <!-- 这行是新增的 -->
-  <link rel="stylesheet" href="style.css" />
-  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;700&display=swap" />
-  <script src="https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js"></script>
+  <meta charset="UTF-8">
+  <title>恋爱对话清洗与打包工具</title>
+  <link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <div id="startup-screen">
-  <img src="logo.png" alt="logo" />
-  <div class="loading-text">🩵正在唤醒✨回忆碎片🪄请稍候…</div>
-</div>
-<h1>梅宝 × 阿景 的记忆打包机</h1>
-<p>上传 conversation JSON 文件 → 拆分多个 txt → 自定义名字 → 下载回忆</p>
+  <h1>恋爱对话清洗与打包工具</h1>
+  <p>支持上传 JSON / TXT / PDF / DOCX</p>
 
-<label>你是谁？<input type="text" id="userName" value="梅宝"></label>
-<br/>
-<label>他是谁？<input type="text" id="assistantName" value="阿景"></label>
-<br/><br/>
+  <input type="file" id="fileInput" multiple />
+  <p id="fileInfo">尚未选择文件</p>
 
-<input type="file" id="fileInput" accept=".json" />
-<br/><br/>
+  <button onclick="handleCleanAndPack()">清洗并打包对话</button>
 
-<button onclick="processFile()">生成记忆文档</button>
-
-<div id="outputArea"></div>
+  <div id="outputArea"></div>
 
   <script src="script.js"></script>
 </body>
