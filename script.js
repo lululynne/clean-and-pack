@@ -8,10 +8,25 @@ function handleCleanAndPack() {
   }
 
  async function detectAndParse(file) {
-    // GPT 老师会在这里给你具体的解析代码
-    // 可以先留空，或者简单写个 return null;
-    console.log('detectAndParse called for:', file.name); // 调试用
+  const fileName = file.name.toLowerCase();
+
+  // 读取内容
+  const text = await file.text();
+
+  if (fileName.endsWith(".json")) {
+    return parseJSONChat(text); // 等下写这个
+  } else if (fileName.endsWith(".txt")) {
+    return text;
+  } else if (fileName.endsWith(".pdf")) {
+    alert("PDF 格式暂未支持自动解析，请手动转 txt");
     return null;
+  } else if (fileName.endsWith(".docx")) {
+    alert("DOCX 格式暂未支持自动解析，请手动转 txt");
+    return null;
+  } else {
+    alert("不支持的文件类型");
+    return null;
+  }
 }
 
 function cleanConversation(rawText, userName, assistantName) {
