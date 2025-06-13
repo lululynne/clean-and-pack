@@ -23,7 +23,8 @@ function handleCleanAndPack() {
         detectAndParse(file).then(rawText => {
             if (rawText) { // 只有成功解析才进行清洗和添加
                 const cleaned = cleanConversation(rawText, userName, assistantName);
-                cleanedContents.push({ filename: `${file.name}.txt`, content: cleaned });
+                // 正确调用 addToZip 函数，并将其返回的对象添加到 cleanedContents
+                cleanedContents.push(addToZip(`恋人对话-${file.name}.txt`, cleaned)); // <-- 修正此处
             }
             processedCount++;
 
@@ -38,8 +39,9 @@ function handleCleanAndPack() {
 
                 zip.generateAsync({ type: "blob" })
                     .then(blob => {
-                       const timeStamp = new Date().toISOString().replace(/[:.]/g, "-"); // 生成时间戳，替换掉特殊字符
-            const zipName = `恋爱对话合集-${timeStamp}.zip`; // 组合文件名
+                        const timeStamp = new Date().toISOString().replace(/[:.]/g, "-"); // 生成时间戳，替换掉特殊字符
+                        const zipName = `恋爱对话合集-${timeStamp}.zip`; // 组合文件名
+                        createDownloadLink(blob, zipName); // <-- 修正此处，使用新的 zipName
                         // 可以更新页面UI，显示成功信息
                         document.getElementById("outputArea").innerText = "文件已打包，请点击下载链接。";
                     })
@@ -124,12 +126,12 @@ function parseJSONChat(raw) {
                 // 暂时在这里硬编码，后续根据 UI 完善
                 const speaker = msg.author.role === "user" ? "用户" : "AI";
                 const text = msg.content.parts.join("\n").trim();
-                result += `<span class="math-inline">\{speaker\}：</span>{text}\n\n`;
+                result += `${speaker}：${text}\n\n`;
             }
         } else if (conv.role && conv.content) {
             // 尝试解析更简单的 JSON 结构，如直接的 role/content 结构
             const speaker = conv.role === "user" ? "用户" : "AI";
-            result += `<span class="math-inline">\{speaker\}：</span>{conv.content.trim()}\n\n`;
+            result += `${speaker}：${conv.content.trim()}\n\n`;
         }
     });
 
@@ -142,13 +144,13 @@ function cleanConversation(rawText, userName = "用户", assistantName = "AI") {
     // 目前只是一个占位符，直接返回原始文本
     // 确保能处理不同平台的对话格式，去除系统信息等
     console.log('cleanConversation called for:', rawText.slice(0, 100) + '...'); // 调试用，只显示前100字符
-
+    
     // 简单模拟清洗：移除一些常见的系统提示或时间戳
     let cleanedText = rawText;
     cleanedText = cleanedText.replace(/\[\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}\]/g, ''); // 移除日期时间戳
     cleanedText = cleanedText.replace(/系统消息：/g, ''); // 移除“系统消息：”
     cleanedText = cleanedText.replace(/<\|start_of_turn\|>|\|\>|\<\|end_of_turn\|>/g, ''); // 移除一些特殊的turn标记
-
+    
     // 确保每个对话都是独立的一行，并加上角色前缀（如果原始文本没有）
     const lines = cleanedText.split('\n').filter(line => line.trim() !== '');
     let formattedLines = [];
@@ -161,11 +163,11 @@ function cleanConversation(rawText, userName = "用户", assistantName = "AI") {
         } else {
             // 如果没有明确的角色前缀，根据上一句的角色来判断，或者默认为AI
             if (lastSpeaker === 'user') {
-                formattedLines.push(`<span class="math-inline">\{userName\}：</span>{line}`);
+                formattedLines.push(`${userName}：${line}`);
             } else if (lastSpeaker === 'assistant') {
-                formattedLines.push(`<span class="math-inline">\{assistantName\}：</span>{line}`);
+                formattedLines.push(`${assistantName}：${line}`);
             } else {
-                formattedLines.push(`<span class="math-inline">\{userName\}：</span>{line}`); // 默认归为用户
+                formattedLines.push(`${userName}：${line}`); // 默认归为用户
             }
         }
     });
@@ -173,13 +175,9 @@ function cleanConversation(rawText, userName = "用户", assistantName = "AI") {
     return formattedLines.join('\n').trim();
 }
 
-// 将清洗后的内容加入 zip (需要 JSZip 库)
-// 确保在 HTML 中引入了 JSZip CDN，例如：
-// <script src="https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js"></script>
-function addToZip(`恋人对话-${file.name}.txt`, cleaned);
-    // JSZip 对象在 handleCleanAndPack 内部创建并管理
-    // 此函数不再直接操作全局 zip 对象，而是返回一个包含文件名和内容的结构
-    // 以便 handleCleanAndPack 统一添加到 zip
+// 将清洗后的内容加入 zip (正确定义为函数)
+function addToZip(filename, content) { // <-- 修正此处：`function addToZip(filename, content) {`
+    // 此函数返回一个包含文件名和内容的结构，以便 handleCleanAndPack 统一添加到 zip
     return { filename, content };
 }
 
@@ -210,7 +208,3 @@ function createDownloadLink(blob, zipName) {
         setTimeout(() => URL.revokeObjectURL(url), 100);
     };
 }
-
-// 注意：JSZip 库需要在 index.html 中通过 CDN 引入
-// 例如：
-// <script src="https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js"></script>
