@@ -24,7 +24,8 @@ function handleCleanAndPack() {
             if (rawText) { // 只有成功解析才进行清洗和添加
                 const cleaned = cleanConversation(rawText, userName, assistantName);
                 // 正确调用 addToZip 函数，并将其返回的对象添加到 cleanedContents
-                cleanedContents.push(addToZip(`恋人对话-${file.name}.txt`, cleaned)); // <-- 修正此处
+                // 注意：这里传递的是文件的原始名称，AddToZip 函数会加上前缀
+                cleanedContents.push(addToZip(file.name, cleaned)); // <-- 修正此处：传递 file.name
             }
             processedCount++;
 
@@ -41,7 +42,7 @@ function handleCleanAndPack() {
                     .then(blob => {
                         const timeStamp = new Date().toISOString().replace(/[:.]/g, "-"); // 生成时间戳，替换掉特殊字符
                         const zipName = `恋爱对话合集-${timeStamp}.zip`; // 组合文件名
-                        createDownloadLink(blob, zipName); // <-- 修正此处，使用新的 zipName
+                        createDownloadLink(blob, zipName);
                         // 可以更新页面UI，显示成功信息
                         document.getElementById("outputArea").innerText = "文件已打包，请点击下载链接。";
                     })
@@ -178,7 +179,9 @@ function cleanConversation(rawText, userName = "用户", assistantName = "AI") {
 // 将清洗后的内容加入 zip (正确定义为函数)
 function addToZip(filename, content) { // <-- 修正此处：`function addToZip(filename, content) {`
     // 此函数返回一个包含文件名和内容的结构，以便 handleCleanAndPack 统一添加到 zip
-    return { filename, content };
+    // G老师的建议：在文件名前面加“恋人对话-”前缀
+    const finalFilename = `恋人对话-${filename}`;
+    return { filename: finalFilename, content };
 }
 
 
