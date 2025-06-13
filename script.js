@@ -6,7 +6,31 @@ function handleCleanAndPack() {
       addToZip(`${file.name}.txt`, cleaned);
     });
   }
+function parseJSONChat(raw) {
+  let data;
+  try {
+    data = JSON.parse(raw);
+  } catch {
+    return "无法解析 JSON";
+  }
 
+  const conversations = Array.isArray(data) ? data : [data];
+  let result = "";
+
+  conversations.forEach(conv => {
+    const mapping = conv.mapping || {};
+    for (const key in mapping) {
+      const msg = mapping[key].message;
+      if (!msg || !msg.author || !msg.content || !msg.content.parts) continue;
+
+      const speaker = msg.author.role === "user" ? userName : assistantName;
+      const text = msg.content.parts.join("\n").trim();
+      result += `${speaker}：${text}\n\n`;
+    }
+  });
+
+  return result;
+}
  async function detectAndParse(file) {
   const fileName = file.name.toLowerCase();
 
