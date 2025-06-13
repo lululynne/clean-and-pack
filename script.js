@@ -38,7 +38,8 @@ function handleCleanAndPack() {
 
                 zip.generateAsync({ type: "blob" })
                     .then(blob => {
-                        createDownloadLink(blob, "恋爱对话合集.zip");
+                       const timeStamp = new Date().toISOString().replace(/[:.]/g, "-"); // 生成时间戳，替换掉特殊字符
+            const zipName = `恋爱对话合集-${timeStamp}.zip`; // 组合文件名
                         // 可以更新页面UI，显示成功信息
                         document.getElementById("outputArea").innerText = "文件已打包，请点击下载链接。";
                     })
@@ -175,7 +176,7 @@ function cleanConversation(rawText, userName = "用户", assistantName = "AI") {
 // 将清洗后的内容加入 zip (需要 JSZip 库)
 // 确保在 HTML 中引入了 JSZip CDN，例如：
 // <script src="https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js"></script>
-function addToZip(filename, content) {
+function addToZip(`恋人对话-${file.name}.txt`, cleaned);
     // JSZip 对象在 handleCleanAndPack 内部创建并管理
     // 此函数不再直接操作全局 zip 对象，而是返回一个包含文件名和内容的结构
     // 以便 handleCleanAndPack 统一添加到 zip
