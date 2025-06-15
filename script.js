@@ -1,38 +1,79 @@
+function detectAndParse(file) {
+  return new Promise((resolve) => {
+    const reader = new FileReader();
+    reader.onload = function (e) {
+      resolve(e.target.result);
+    };
+    reader.readAsText(file);
+  });
+}
+
 function cleanConversation(rawText, userName = "用户", assistantName = "AI") {
-  let cleaned = rawText
-    .replace(/\|\|.*?\|\|/g, '') 
-    .replace(/\[.*?\]/g, '') 
-    .replace(/\n{2,}/g, '\n') 
-    .trim();
+  let cleanedText = "";
 
-  const lines = cleaned.split('\n').filter(line => line.trim() !== '');
-  const output = [];
+  try {
+    const json = JSON.parse(rawText);
 
-  let lastSpeaker = null;
+    // GPT JSON 格式：包含 mapping 和 message.parts
+    if (json.mapping) {
+      const mapping = json.mapping;
+      const messages = [];
 
-  lines.forEach(line => {
-    let speaker = null;
-    let content = line.trim();
+      for (const key in mapping) {
+        const msg = mapping[key].message;
+        if (!msg || !msg.author || !msg.content || !msg.content.parts) continue;
 
-    if (content.startsWith(`${userName}：`) || content.startsWith(`${userName}:`)) {
-      speaker = userName;
-      content = content.replace(`${userName}：`, '').replace(`${userName}:`, '').trim();
-    } else if (content.startsWith(`${assistantName}：`) || content.startsWith(`${assistantName}:`)) {
-      speaker = assistantName;
-      content = content.replace(`${assistantName}：`, '').replace(`${assistantName}:`, '').trim();
-    } else {
-      speaker = lastSpeaker || assistantName;
+        const role = msg.author.role;
+        const speaker = role === "user" ? userName : assistantName;
+        const text = msg.content.parts.join("\n").trim();
+        messages.push(`${speaker}：${text}`);
+      }
+
+      cleanedText = messages.join("\n\n");
+    }
+    // Claude JSON 格式（或手写 JSON array）
+    else if (Array.isArray(json)) {
+      const messages = [];
+
+      for (const entry of json) {
+        if (!entry.role || !entry.content) continue;
+        const speaker = entry.role === "user" ? userName : assistantName;
+        messages.push(`${speaker}：${entry.content.trim()}`);
+      }
+
+      cleanedText = messages.join("\n\n");
+    }
+    // 不是结构化 JSON
+    else {
+      cleanedText = rawText;
+    }
+  } catch (err) {
+    // fallback: 处理 TXT 文本
+    const lines = rawText.split('\n').filter(line => line.trim() !== '');
+    const output = [];
+    let lastSpeaker = assistantName;
+
+    for (let line of lines) {
+      line = line.trim();
+      if (line.startsWith(`${userName}：`) || line.startsWith(`${userName}:`)) {
+        output.push(`${userName}：${line.replace(`${userName}：`, '').replace(`${userName}:`, '').trim()}`);
+        lastSpeaker = userName;
+      } else if (line.startsWith(`${assistantName}：`) || line.startsWith(`${assistantName}:`)) {
+        output.push(`${assistantName}：${line.replace(`${assistantName}：`, '').replace(`${assistantName}:`, '').trim()}`);
+        lastSpeaker = assistantName;
+      } else {
+        output.push(`${lastSpeaker}：${line}`);
+      }
     }
 
-    output.push(`${speaker}：${content}`);
-    lastSpeaker = speaker;
-  });
+    cleanedText = output.join('\n');
+  }
 
-  return output.join('\n').trim();
+  return cleanedText.trim();
 }
 
 function addToZip(filename, content) {
-  const finalFilename = `恋人对话-${filename}`;
+  const finalFilename = `恋人对话-${filename.replace(/\.[^.]+$/, "")}.txt`;
   return { filename: finalFilename, content };
 }
 
@@ -51,9 +92,7 @@ function handleCleanAndPack() {
   let processedCount = 0;
 
   files.forEach(file => {
-    const reader = new FileReader();
-    reader.onload = function (e) {
-      const rawText = e.target.result;
+    detectAndParse(file).then(rawText => {
       const cleaned = cleanConversation(rawText, userName, assistantName);
       const cleanedItem = addToZip(file.name, cleaned);
       zip.file(cleanedItem.filename, cleanedItem.content);
@@ -64,8 +103,7 @@ function handleCleanAndPack() {
           createDownloadLink(blob, "恋人对话合集.zip");
         });
       }
-    };
-    reader.readAsText(file);
+    });
   });
 }
 
