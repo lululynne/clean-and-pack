@@ -135,12 +135,12 @@ function parseJSONChat(raw) {
                 // 暂时在这里硬编码，后续根据 UI 完善
                 const speaker = msg.author.role === "user" ? "用户" : "AI";
                 const text = msg.content.parts.join("\n").trim();
-                result += `<span class="math-inline">\{speaker\}：</span>{text}\n\n`;
+                result += `${speaker}: ${text}\n\n`;
             }
         } else if (conv.role && conv.content) {
             // 尝试解析更简单的 JSON 结构，如直接的 role/content 结构
             const speaker = conv.role === "user" ? "用户" : "AI";
-            result += `<span class="math-inline">\{speaker\}：</span>{conv.content.trim()}\n\n`;
+            result += `${speaker}: ${text}\n\n`;
         }
     });
 
@@ -172,11 +172,11 @@ function cleanConversation(rawText, userName = "用户", assistantName = "AI") {
         } else {
             // 如果没有明确的角色前缀，根据上一句的角色来判断，或者默认为AI
             if (lastSpeaker === 'user') {
-                formattedLines.push(`<span class="math-inline">\{userName\}：</span>{line}`);
+                formattedLines.push(`${userName}: ${line}`);
             } else if (lastSpeaker === 'assistant') {
-                formattedLines.push(`<span class="math-inline">\{assistantName\}：</span>{line}`);
+                formattedLines.push(`${assistantName}: ${line}`);
             } else {
-                formattedLines.push(`<span class="math-inline">\{userName\}：</span>{line}`); // 默认归为用户
+            formattedLines.push(`${userName}: ${line}`); // 默认归为用户
             }
         }
     });
