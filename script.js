@@ -25,7 +25,7 @@ function handleCleanAndPack() {
                 const cleaned = cleanConversation(rawText, userName, assistantName);
                 // 正确调用 addToZip 函数，并将其返回的对象添加到 cleanedContents
                 // 注意：这里传递的是文件的原始名称，AddToZip 函数会加上前缀
-                cleanedContents.push(addToZip(file.name, cleaned)); // <-- 修正此处：传递 file.name
+                cleanedContents.push(addToZip(file.name, cleaned)); 
             }
             processedCount++;
 
@@ -42,18 +42,20 @@ function handleCleanAndPack() {
                     .then(blob => {
                         const timeStamp = new Date().toISOString().replace(/[:.]/g, "-"); // 生成时间戳，替换掉特殊字符
                         const zipName = `恋爱对话合集-${timeStamp}.zip`; // 组合文件名
-                        createDownloadLink(blob, zipName);
+
+                        document.getElementById("outputArea").innerHTML = ""; // 清空旧内容
+                        createDownloadLink(blob, zipName); // 调用创建下载链接的函数
+
                         // 可以更新页面UI，显示成功信息
-                      document.getElementById("outputArea").innerHTML = ""; // 清空旧内容
-createDownloadLink(blob, zipName); // 调用创建下载链接的函数
+                        // document.getElementById("outputArea").innerText = "文件已打包，请点击下载链接。"; // 这一行可以注释掉或移除
                     })
-                   .catch(err => {
-    console.error("打包ZIP失败:", err);
-    document.getElementById("outputArea").innerHTML = ""; // 清空旧内容
-    document.getElementById("outputArea").innerText = "打包失败，请查看控制台错误。"; // 保留错误信息
-});
+                    .catch(err => {
+                        console.error("打包ZIP失败:", err);
+                        document.getElementById("outputArea").innerHTML = ""; // 清空旧内容
+                        document.getElementById("outputArea").innerText = "打包失败，请查看控制台错误。"; // 显示错误信息
+                    });
             }
-}).catch(error => {
+        }).catch(error => {
             console.error("文件处理失败:", error);
             document.getElementById("outputArea").innerText = `处理文件 ${file.name} 失败: ${error.message}`; // 仍然显示特定文件的错误
             processedCount++; // 即使失败也要计数，确保最终打包逻辑触发
@@ -66,7 +68,7 @@ createDownloadLink(blob, zipName); // 调用创建下载链接的函数
                 zip.generateAsync({ type: "blob" })
                     .then(blob => {
                         document.getElementById("outputArea").innerHTML = ""; // 清空旧内容
-                        createDownloadLink(blob, "部分恋爱对话合集.zip"); // 调用创建下载链接的函数
+                        createDownloadLink(blob, "部分恋爱对话合集.zip"); // 调用创建下载链接的函数，使用固定的部分打包文件名
                         // 可以更新页面UI，显示成功信息
                         // document.getElementById("outputArea").innerText = "部分文件打包成功，请点击下载链接。"; // <-- 这一行可以注释掉或移除
                     })
@@ -133,12 +135,12 @@ function parseJSONChat(raw) {
                 // 暂时在这里硬编码，后续根据 UI 完善
                 const speaker = msg.author.role === "user" ? "用户" : "AI";
                 const text = msg.content.parts.join("\n").trim();
-                result += `${speaker}：${text}\n\n`;
+                result += `<span class="math-inline">\{speaker\}：</span>{text}\n\n`;
             }
         } else if (conv.role && conv.content) {
             // 尝试解析更简单的 JSON 结构，如直接的 role/content 结构
             const speaker = conv.role === "user" ? "用户" : "AI";
-            result += `${speaker}：${conv.content.trim()}\n\n`;
+            result += `<span class="math-inline">\{speaker\}：</span>{conv.content.trim()}\n\n`;
         }
     });
 
@@ -151,13 +153,13 @@ function cleanConversation(rawText, userName = "用户", assistantName = "AI") {
     // 目前只是一个占位符，直接返回原始文本
     // 确保能处理不同平台的对话格式，去除系统信息等
     console.log('cleanConversation called for:', rawText.slice(0, 100) + '...'); // 调试用，只显示前100字符
-    
+
     // 简单模拟清洗：移除一些常见的系统提示或时间戳
     let cleanedText = rawText;
     cleanedText = cleanedText.replace(/\[\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}\]/g, ''); // 移除日期时间戳
     cleanedText = cleanedText.replace(/系统消息：/g, ''); // 移除“系统消息：”
     cleanedText = cleanedText.replace(/<\|start_of_turn\|>|\|\>|\<\|end_of_turn\|>/g, ''); // 移除一些特殊的turn标记
-    
+
     // 确保每个对话都是独立的一行，并加上角色前缀（如果原始文本没有）
     const lines = cleanedText.split('\n').filter(line => line.trim() !== '');
     let formattedLines = [];
@@ -170,11 +172,11 @@ function cleanConversation(rawText, userName = "用户", assistantName = "AI") {
         } else {
             // 如果没有明确的角色前缀，根据上一句的角色来判断，或者默认为AI
             if (lastSpeaker === 'user') {
-                formattedLines.push(`${userName}：${line}`);
+                formattedLines.push(`<span class="math-inline">\{userName\}：</span>{line}`);
             } else if (lastSpeaker === 'assistant') {
-                formattedLines.push(`${assistantName}：${line}`);
+                formattedLines.push(`<span class="math-inline">\{assistantName\}：</span>{line}`);
             } else {
-                formattedLines.push(`${userName}：${line}`); // 默认归为用户
+                formattedLines.push(`<span class="math-inline">\{userName\}：</span>{line}`); // 默认归为用户
             }
         }
     });
@@ -183,7 +185,7 @@ function cleanConversation(rawText, userName = "用户", assistantName = "AI") {
 }
 
 // 将清洗后的内容加入 zip (正确定义为函数)
-function addToZip(filename, content) { // <-- 修正此处：`function addToZip(filename, content) {`
+function addToZip(filename, content) { 
     // 此函数返回一个包含文件名和内容的结构，以便 handleCleanAndPack 统一添加到 zip
     // G老师的建议：在文件名前面加“恋人对话-”前缀
     const finalFilename = `恋人对话-${filename}`;
