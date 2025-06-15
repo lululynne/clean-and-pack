@@ -1,10 +1,8 @@
 function cleanConversation(rawText, userName = "用户", assistantName = "AI") {
-  console.log('cleanConversation called for:', rawText.slice(0, 100) + '...');
-
   let cleaned = rawText
-    .replace(/\|\|.*?\|\|/g, '') // 移除 ||系统提示||
-    .replace(/\[.*?\]/g, '') // 移除 [timestamp]
-    .replace(/\n{2,}/g, '\n') // 合并多行换行
+    .replace(/\|\|.*?\|\|/g, '') 
+    .replace(/\[.*?\]/g, '') 
+    .replace(/\n{2,}/g, '\n') 
     .trim();
 
   const lines = cleaned.split('\n').filter(line => line.trim() !== '');
@@ -33,13 +31,11 @@ function cleanConversation(rawText, userName = "用户", assistantName = "AI") {
   return output.join('\n').trim();
 }
 
-// 添加 ZIP 文件的打包逻辑
 function addToZip(filename, content) {
   const finalFilename = `恋人对话-${filename}`;
   return { filename: finalFilename, content };
 }
 
-// 点击按钮的主入口逻辑
 function handleCleanAndPack() {
   const fileInput = document.getElementById("fileInput");
   const userName = document.getElementById("userNameInput").value.trim() || "用户";
@@ -47,7 +43,7 @@ function handleCleanAndPack() {
 
   const files = Array.from(fileInput.files);
   if (!files.length) {
-    alert("请选择至少一个文件！");
+    alert("请选择文件！");
     return;
   }
 
@@ -73,14 +69,13 @@ function handleCleanAndPack() {
   });
 }
 
-// 创建下载链接按钮
 function createDownloadLink(blob, zipName) {
   const url = URL.createObjectURL(blob);
   const a = document.createElement("a");
   a.href = url;
   a.download = zipName;
   a.textContent = `点击下载 ${zipName}`;
-  a.style.display = 'block';
+  a.style.display = 'inline-block';
   a.style.marginTop = '20px';
   a.style.padding = '10px 20px';
   a.style.backgroundColor = '#6200EE';
