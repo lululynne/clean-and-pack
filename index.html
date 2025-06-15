@@ -4,18 +4,19 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>恋爱对话清洗与打包工具</title>
+  <link rel="stylesheet" href="style.css" />
   <script src="https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js"></script>
 </head>
 <body>
   <h1>恋爱对话清洗与打包工具</h1>
   <p>支持上传 JSON / TXT / PDF / DOCX</p>
 
-  <input type="file" id="fileInput" multiple /><br />
-  <input type="text" id="userNameInput" placeholder="用户昵称（默认：用户）"><br />
-  <input type="text" id="assistantNameInput" placeholder="AI昵称（默认：AI）"><br />
+  <input type="file" id="fileInput" multiple />
+  <input type="text" id="userNameInput" placeholder="用户昵称（默认：用户）" />
+  <input type="text" id="assistantNameInput" placeholder="AI昵称（默认：AI）" />
+  <br />
   <button onclick="handleCleanAndPack()">清洗并打包对话</button>
-
-  <div id="outputArea" style="margin-top: 20px;"></div>
+  <div id="outputArea"></div>
 
   <script src="script.js"></script>
 </body>
