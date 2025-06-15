@@ -44,16 +44,18 @@ function handleCleanAndPack() {
                         const zipName = `恋爱对话合集-${timeStamp}.zip`; // 组合文件名
                         createDownloadLink(blob, zipName);
                         // 可以更新页面UI，显示成功信息
-                        document.getElementById("outputArea").innerText = "文件已打包，请点击下载链接。";
+                      document.getElementById("outputArea").innerHTML = ""; // 清空旧内容
+createDownloadLink(blob, zipName); // 调用创建下载链接的函数
                     })
-                    .catch(err => {
-                        console.error("打包ZIP失败:", err);
-                        document.getElementById("outputArea").innerText = "打包失败，请查看控制台错误。";
-                    });
+                   .catch(err => {
+    console.error("打包ZIP失败:", err);
+    document.getElementById("outputArea").innerHTML = ""; // 清空旧内容
+    document.getElementById("outputArea").innerText = "打包失败，请查看控制台错误。"; // 保留错误信息
+});
             }
-        }).catch(error => {
+}).catch(error => {
             console.error("文件处理失败:", error);
-            document.getElementById("outputArea").innerText = `处理文件 ${file.name} 失败: ${error.message}`;
+            document.getElementById("outputArea").innerText = `处理文件 ${file.name} 失败: ${error.message}`; // 仍然显示特定文件的错误
             processedCount++; // 即使失败也要计数，确保最终打包逻辑触发
             if (processedCount === totalFiles && cleanedContents.length > 0) {
                  // 如果有部分文件成功处理，仍然尝试打包
@@ -63,11 +65,15 @@ function handleCleanAndPack() {
                 });
                 zip.generateAsync({ type: "blob" })
                     .then(blob => {
-                        createDownloadLink(blob, "部分恋爱对话合集.zip");
-                        document.getElementById("outputArea").innerText = "部分文件打包成功，请点击下载链接。";
+                        document.getElementById("outputArea").innerHTML = ""; // 清空旧内容
+                        createDownloadLink(blob, "部分恋爱对话合集.zip"); // 调用创建下载链接的函数
+                        // 可以更新页面UI，显示成功信息
+                        // document.getElementById("outputArea").innerText = "部分文件打包成功，请点击下载链接。"; // <-- 这一行可以注释掉或移除
                     })
                     .catch(err => {
                         console.error("部分打包ZIP失败:", err);
+                        document.getElementById("outputArea").innerHTML = ""; // 清空旧内容
+                        document.getElementById("outputArea").innerText = "部分打包失败，请查看控制台错误。"; // 显示错误信息
                     });
             }
         });
