@@ -149,11 +149,40 @@ function parseJSONChat(raw) {
 
 // 清洗对话内容 (目前简化，后续需要强化)
 function cleanConversation(rawText, userName = "用户", assistantName = "AI") {
-    // GPT 老师会在这里给你具体的清洗代码
-    // 目前只是一个占位符，直接返回原始文本
-    // 确保能处理不同平台的对话格式，去除系统信息等
-    console.log('cleanConversation called for:', rawText.slice(0, 100) + '...'); // 调试用，只显示前100字符
+  console.log('cleanConversation called for:', rawText.slice(0, 100) + '...');
 
+  // 先去除系统标记与格式字符
+  let cleaned = rawText
+    .replace(/\|\|.*?\|\|/g, '') // 移除如 ||系统提示|| 结构
+    .replace(/\[.*?\]/g, '') // 移除如 [timestamp] 结构
+    .replace(/\n{2,}/g, '\n') // 连续换行合并
+    .trim();
+
+  const lines = cleaned.split('\n').filter(line => line.trim() !== '');
+  const output = [];
+
+  let lastSpeaker = null;
+
+  lines.forEach(line => {
+    let speaker = null;
+    let content = line.trim();
+
+    if (content.startsWith(`${userName}：`) || content.startsWith(`${userName}:`)) {
+      speaker = userName;
+      content = content.replace(`${userName}：`, '').replace(`${userName}:`, '').trim();
+    } else if (content.startsWith(`${assistantName}：`) || content.startsWith(`${assistantName}:`)) {
+      speaker = assistantName;
+      content = content.replace(`${assistantName}：`, '').replace(`${assistantName}:`, '').trim();
+    } else {
+      speaker = lastSpeaker || assistantName; // 如果无法识别，就用上一次说话人，或默认AI
+    }
+
+    output.push(`${speaker}：${content}`);
+    lastSpeaker = speaker;
+  });
+
+  return output.join('\n').trim();
+}
     // 简单模拟清洗：移除一些常见的系统提示或时间戳
     let cleanedText = rawText;
     cleanedText = cleanedText.replace(/\[\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}\]/g, ''); // 移除日期时间戳
