@@ -183,36 +183,6 @@ function cleanConversation(rawText, userName = "用户", assistantName = "AI") {
 
   return output.join('\n').trim();
 }
-    // 简单模拟清洗：移除一些常见的系统提示或时间戳
-}
-
-// 将清洗后的内容加入 zip (正确定义为函数)
-function addToZip(filename, content) { 
-    // 此函数返回一个包含文件名和内容的结构，以便 handleCleanAndPack 统一添加到 zip
-    // G老师的建议：在文件名前面加“恋人对话-”前缀
-    const finalFilename = `恋人对话-${filename}`;
-    return { filename: finalFilename, content };
-}
-
-
-// 创建并展示下载链接
-function createDownloadLink(blob, zipName) {
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = zipName;
-    a.textContent = `点击下载 ${zipName}`;
-    a.style.display = 'block';
-    a.style.marginTop = '20px';
-    a.style.textAlign = 'center';
-    a.style.padding = '10px 20px';
-    a.style.backgroundColor = '#6200EE';
-    a.style.color = 'white';
-    a.style.textDecoration = 'none';
-    a.style.borderRadius = '5px';
-    a.style.cursor = 'pointer';
-
-    const outputArea = document.getElementById('outputArea');
     outputArea.innerHTML = ''; // 清空之前的提示
     outputArea.appendChild(a);
 
