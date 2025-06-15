@@ -184,33 +184,6 @@ function cleanConversation(rawText, userName = "用户", assistantName = "AI") {
   return output.join('\n').trim();
 }
     // 简单模拟清洗：移除一些常见的系统提示或时间戳
-    let cleanedText = rawText;
-    cleanedText = cleanedText.replace(/\[\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}\]/g, ''); // 移除日期时间戳
-    cleanedText = cleanedText.replace(/系统消息：/g, ''); // 移除“系统消息：”
-    cleanedText = cleanedText.replace(/<\|start_of_turn\|>|\|\>|\<\|end_of_turn\|>/g, ''); // 移除一些特殊的turn标记
-
-    // 确保每个对话都是独立的一行，并加上角色前缀（如果原始文本没有）
-    const lines = cleanedText.split('\n').filter(line => line.trim() !== '');
-    let formattedLines = [];
-    let lastSpeaker = '';
-
-    lines.forEach(line => {
-        if (line.startsWith('用户：') || line.startsWith('AI：') || line.startsWith(userName + '：') || line.startsWith(assistantName + '：')) {
-            formattedLines.push(line);
-            lastSpeaker = line.startsWith('用户：') || line.startsWith(userName + '：') ? 'user' : 'assistant';
-        } else {
-            // 如果没有明确的角色前缀，根据上一句的角色来判断，或者默认为AI
-            if (lastSpeaker === 'user') {
-                formattedLines.push(`${userName}: ${line}`);
-            } else if (lastSpeaker === 'assistant') {
-                formattedLines.push(`${assistantName}: ${line}`);
-            } else {
-            formattedLines.push(`${userName}: ${line}`); // 默认归为用户
-            }
-        }
-    });
-
-    return formattedLines.join('\n').trim();
 }
 
 // 将清洗后的内容加入 zip (正确定义为函数)
